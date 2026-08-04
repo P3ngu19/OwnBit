@@ -1,0 +1,15 @@
+.form-control{
+    height:48px;
+    border-radius:10px;
+}
+
+.form-control:focus{
+    border-color:#16a34a;
+    box-shadow:none;
+}
+
+.btn-success{
+    height:48px;
+    border-radius:10px;
+    font-weight:600;
+}
