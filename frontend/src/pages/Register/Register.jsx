@@ -49,19 +49,18 @@ function Register() {
       alert(error.response?.data?.message || "Registration failed.");
     }
   };
-
   return (
     <AuthLayout
       title="Create Account"
-      subtitle="Start investing in tokenized real estate."
+      subtitle="Create your account and begin your real estate investment journey."
     >
       <form onSubmit={handleSubmit}>
 
-        <div className="mb-3">
+        <div className="form-group">
           <label className="form-label">Full Name</label>
           <input
             type="text"
-            className="form-control"
+            className="auth-input"
             name="name"
             value={formData.name}
             onChange={handleChange}
@@ -70,11 +69,11 @@ function Register() {
           />
         </div>
 
-        <div className="mb-3">
+        <div className="form-group">
           <label className="form-label">Email</label>
           <input
             type="email"
-            className="form-control"
+            className="auth-input"
             name="email"
             value={formData.email}
             onChange={handleChange}
@@ -83,11 +82,11 @@ function Register() {
           />
         </div>
 
-        <div className="mb-3">
+        <div className="form-group">
           <label className="form-label">Password</label>
           <input
             type="password"
-            className="form-control"
+            className="auth-input"
             name="password"
             value={formData.password}
             onChange={handleChange}
@@ -96,11 +95,11 @@ function Register() {
           />
         </div>
 
-        <div className="mb-4">
+        <div className="form-group">
           <label className="form-label">Confirm Password</label>
           <input
             type="password"
-            className="form-control"
+            className="auth-input"
             name="confirmPassword"
             value={formData.confirmPassword}
             onChange={handleChange}
@@ -109,13 +108,14 @@ function Register() {
           />
         </div>
 
-        <button className="btn btn-success w-100" type="submit">
-          Create Account
-        </button>
-
-        <p className="text-center mt-4">
+          <button className="auth-btn" type="submit">
+            Create Account →
+          </button>
+        <p className="auth-switch">
           Already have an account?{" "}
-          <Link to="/">Login</Link>
+          <Link to="/Login">
+            Sign In
+          </Link>
         </p>
 
       </form>

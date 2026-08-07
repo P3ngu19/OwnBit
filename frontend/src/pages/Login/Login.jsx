@@ -47,11 +47,11 @@ function Login() {
   return (
     <AuthLayout
       title="Welcome Back"
-      subtitle="Login to your OwnBit account."
+      subtitle="Access your investment portfolio and continue your journey."
     >
       <form onSubmit={handleSubmit}>
 
-        <div className="mb-3">
+        <div className="form-group">
           <label className="form-label">Email</label>
 
           <input
@@ -65,7 +65,7 @@ function Login() {
           />
         </div>
 
-        <div className="mb-4">
+        <div className="auth-input">
           <label className="form-label">Password</label>
 
           <input
@@ -79,11 +79,11 @@ function Login() {
           />
         </div>
 
-        <button className="btn btn-success w-100" type="submit">
-          Login
-        </button>
+          <button className="auth-btn" type="submit">
+            Sign In →
+          </button>
 
-        <p className="text-center mt-4">
+        <p className="auth-switch">
           Don't have an account?{" "}
           <Link to="/register">Create Account</Link>
         </p>
