@@ -1,19 +1,268 @@
+/* ===========================
+   Kana Font
+=========================== */
+
+@font-face {
+  font-family: "Kana";
+  src: url("../../assets/fonts/Kana.otf") format("opentype");
+  font-weight: normal;
+  font-style: normal;
+}
+
+/* ===========================
+   Hero Section
+=========================== */
+
+.hero {
+  position: relative;
+  width: 100%;
+  height: 150vh;
+
+  background: url("../../assets/images/hero-bg.jpg");
+  background-size: cover;
+  background-position: top-center;
+  background-repeat: no-repeat;
+  background-color: #F7F6F2;
+
+  overflow: hidden;
+}
+
+.hero-sticky{
+    position: sticky;
+    top:0;
+
+    width:100%;
+    height:100vh;
+
+    overflow:hidden;
+}
+
+/* ===========================
+   Dark Overlay
+=========================== */
+
+.hero-overlay {
+  position: absolute;
+  inset: 0;
+
+  background: linear-gradient(
+      to bottom,
+      rgba(0, 0, 0, 0.18),
+      rgba(0, 0, 0, 0.30)
+  );
+
+  z-index: 1;
+}
+
+/* ===========================
+   Hero Content
+=========================== */
+
+.hero-content {
+  position: absolute;
+
+  top: 40%;
+  left: 50%;
+
+  transform: translate(-50%, -50%);
+
+  width: 100%;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  text-align: center;
+
+  z-index: 2;
+
+  transition:
+      opacity .25s linear,
+      transform .25s linear;
+}
+
+/* ===========================
+   Giant Typography
+=========================== */
+
+.hero-title {
+
+  font-family: "Kana", serif;
+
+  font-size: clamp(9rem, 18vw, 22rem);
+
+  font-weight: normal;
+
+  color: #2A3E4B;
+
+  letter-spacing: -0.04em;
+
+  line-height: .82;
+
+  margin: 0;
+
+  text-transform: none;
+
+  user-select: none;
+
+}
+
+/* ===========================
+   Subtitle
+=========================== */
+
+.hero-subtitle {
+
+  margin-top: 3rem;
+
+  font-size: 1.15rem;
+
+  font-weight: 300;
+
+  color: #2A3E4B;
+
+  letter-spacing: 1px;
+
+  max-width: 700px;
+
+  line-height: 1.8;
+
+}
+
+/* ===========================
+   Button
+=========================== */
+
+.hero-btn {
+
+  margin-top: 2.5rem;
+
+  padding: 16px 38px;
+
+  border-radius: 999px;
+
+  border: 1px solid rgba(255,255,255,.30);
+
+  background: rgba(255,255,255,.08);
+
+  backdrop-filter: blur(16px);
+
+  color: #F4F4EE;
+
+  font-size: .95rem;
+
+  letter-spacing: 1px;
+
+  cursor: pointer;
+
+  transition: all .35s ease;
+
+}
+
+.hero-btn:hover {
+
+  background: rgba(255,255,255,.18);
+
+  transform: translateY(-3px);
+
+  box-shadow:
+      0 18px 40px rgba(0,0,0,.25);
+
+}
+
+/* ===========================
+   Smooth Scroll
+=========================== */
+
+html {
+
+  scroll-behavior: smooth;
+
+}
+
+/* ===========================
+   Responsive
+=========================== */
+
+@media (max-width:1200px){
+
+.hero-title{
+
+    font-size:clamp(8rem,16vw,16rem);
+
+}
+
+}
+
+@media (max-width:992px){
+
+.hero-title{
+
+    font-size:clamp(7rem,18vw,12rem);
+
+}
+
+.hero-subtitle{
+
+    width:85%;
+
+    font-size:1rem;
+
+}
+
+}
+
+@media (max-width:768px){
+
 .hero{
-    min-height: calc(100vh - 80px);
 
-    display:flex;
-    align-items:center;
+    background-position:center;
+
 }
 
-.hero h1{
-    color:white;
-    font-size:4rem;
-    font-weight:700;
+.hero-title{
+
+    font-size:clamp(5rem,20vw,8rem);
+
 }
 
-.hero p{
-    color:white;
-    font-size:1.2rem;
-    margin:25px 0;
-    line-height:1.7;
+.hero-subtitle{
+
+    font-size:.95rem;
+
+    width:90%;
+
+}
+
+.hero-btn{
+
+    padding:14px 30px;
+
+}
+
+}
+
+@media (max-width:480px){
+
+.hero-title{
+
+    font-size:4.2rem;
+
+}
+
+.hero-subtitle{
+
+    font-size:.9rem;
+
+    line-height:1.6;
+
+}
+
+.hero-btn{
+
+    width:85%;
+
+}
+
 }

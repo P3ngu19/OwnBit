@@ -1,48 +1,71 @@
-import "./PropertyPreview.css";
+import "./PropertyCard.css";
 
-function PropertyPreview() {
+function PropertyCard({ property }) {
   return (
-    <div className="property-card">
+    <article className="property-card">
 
       <div className="property-image">
-        🏢
-      </div>
 
-      <h3>Sky Heights Apartment</h3>
+        <img
+          src={property.image}
+          alt={property.title}
+        />
 
-      <p className="price">₹85,00,000</p>
+        <div className="image-overlay">
 
-      <div className="progress-section">
-        <div className="progress">
-          <div
-            className="progress-bar bg-success"
-            style={{ width: "82%" }}
-          ></div>
+          <div className="overlay-stats">
+
+            <div>
+              <small>ROI</small>
+              <strong>{property.roi}</strong>
+            </div>
+
+            <div>
+              <small>Trust</small>
+              <strong>{property.trustScore}</strong>
+            </div>
+
+            <div>
+              <small>Tokens</small>
+              <strong>{property.availableTokens}</strong>
+            </div>
+
+          </div>
+
         </div>
 
-        <small>82% Funded</small>
       </div>
 
-      <div className="stats">
+      <div className="property-content">
 
-        <div>
-          <span>ROI</span>
-          <strong>11.8%</strong>
-        </div>
+        <span className="category">
+          {property.category}
+        </span>
 
-        <div>
-          <span>Trust Score</span>
-          <strong className="text-success">96/100</strong>
+        <h2>{property.title}</h2>
+
+        <p className="location">
+          {property.location}
+        </p>
+
+        <div className="bottom-row">
+
+          <div className="price">
+            ₹{property.tokenPrice}
+            <span> / Token</span>
+          </div>
+
+          <button className="view-btn">
+            View
+            <span className="arrow">→</span>
+          </button>
+
         </div>
 
       </div>
 
-      <button className="btn btn-success w-100 mt-4">
-        Invest Now
-      </button>
-
-    </div>
+    </article>
   );
 }
 
-export default PropertyPreview;
+export default PropertyCard;

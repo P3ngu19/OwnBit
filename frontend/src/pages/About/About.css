@@ -1,0 +1,101 @@
+.about-page{
+
+    min-height:100vh;
+
+    background:#F7F6F2;
+
+    padding:120px 8%;
+
+}
+
+.about-container{
+
+    max-width:1200px;
+
+    margin:auto;
+
+}
+
+.about-label{
+
+    letter-spacing:3px;
+
+    color:#8B8B8B;
+
+    margin-bottom:20px;
+
+}
+
+.about-container h1{
+
+    font-size:4.5rem;
+
+    color:#2F3C45;
+
+    line-height:1;
+
+    margin-bottom:35px;
+
+}
+
+.about-description{
+
+    max-width:760px;
+
+    font-size:1.15rem;
+
+    line-height:1.9;
+
+    color:#666;
+
+    margin-bottom:90px;
+
+}
+
+.about-grid{
+
+    display:grid;
+
+    grid-template-columns:repeat(auto-fit,minmax(280px,1fr));
+
+    gap:35px;
+
+}
+
+.about-card{
+
+    padding:35px;
+
+    background:white;
+
+    border-radius:16px;
+
+    transition:.35s;
+
+    border:1px solid #E6E6E6;
+
+}
+
+.about-card:hover{
+
+    transform:translateY(-6px);
+
+}
+
+.about-card h3{
+
+    color:#2F3C45;
+
+    margin-bottom:18px;
+
+    font-size:1.6rem;
+
+}
+
+.about-card p{
+
+    color:#707070;
+
+    line-height:1.8;
+
+}

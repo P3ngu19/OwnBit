@@ -1,22 +1,44 @@
-import Navbar from "../../components/Navbar/Navbar";
 import "./Marketplace.css";
+import properties from "../../data/properties";
+import PropertyCard from "../../components/PropertyCard/PropertyCard";
 
 function Marketplace() {
   return (
-    <div className="marketplace-page">
-      <Navbar />
+    <section className="marketplace">
 
-      <section className="marketplace-hero">
-        <div className="container">
-          <span className="marketplace-label">Marketplace</span>
-          <h1>Explore tokenized real estate opportunities.</h1>
-          <p>
-            Browse premium properties, compare investment options, and get
-            ready for the next step of the OwnBit experience.
-          </p>
-        </div>
-      </section>
-    </div>
+
+      <div className="marketplace-header">
+
+        <p className="marketplace-label">
+          MARKETPLACE
+        </p>
+
+        <h1>
+          Discover
+          <br />
+          Premium Properties
+        </h1>
+
+        <p className="marketplace-description">
+          Browse verified tokenized real estate opportunities across India.
+          Invest in premium residential and commercial properties with
+          fractional ownership powered by blockchain.
+        </p>
+
+      </div>
+
+      <div className="property-grid">
+
+        {properties.map((property) => (
+          <PropertyCard
+            key={property.id}
+            property={property}
+          />
+        ))}
+
+      </div>
+
+    </section>
   );
 }
 
