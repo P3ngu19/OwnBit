@@ -1,68 +1,78 @@
-*{
-    margin:0;
-    padding:0;
-    box-sizing:border-box;
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
 }
 
-.auth-container{
-    display:flex;
-    min-height:100vh;
+.auth-container {
+  display: flex;
+  min-height: 100vh;
 }
 
 .auth-left {
-    flex: 1;
-    background-position: center;
-    background-size: cover;
-    background-repeat: no-repeat;
-    position: relative;
+  flex: 1;
+  min-height: 100vh;
+  background-position: center;
+  background-size: cover;
+  background-repeat: no-repeat;
+  position: relative;
 }
 
-.overlay{
-    width:100%;
-    height:100%;
-    background:rgba(0,0,0,.55);
+.overlay {
+  width: 100%;
+  height: 100%;
+  min-height: 100vh;
+  
 
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    flex-direction:column;
+  display: flex;
+  justify-content: top;
+  align-items: center;
+  flex-direction: column;
 
-    color:white;
-    text-align:center;
-    padding:40px;
+  color: #A8755A;
+  text-align: center;
+  padding: 40px;
+}
+.overlay h1,
+.overlay p {
+  transform: translateY(100px);
 }
 
-.overlay h1{
-    font-size:3rem;
-    margin-bottom:20px;
+.overlay h1 {
+  font-size: 4rem;
+  margin-bottom: 15px;
+  font-weight: 600;
 }
 
-.overlay p{
-    font-size:1.2rem;
-    max-width:400px;
+.overlay p {
+  font-size: 1.1rem;
+  max-width: 400px;
+  line-height: 1.6;
 }
 
-.auth-right{
-    flex:1;
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    background:#f4f4f4;
+.auth-right {
+  flex: 1;
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: #f4f4ee;
 }
 
-.auth-card{
-    width:420px;
-    background:white;
-    padding:40px;
-    border-radius:15px;
-    box-shadow:0 10px 30px rgba(0,0,0,.15);
+.auth-card {
+  width: 420px;
+  background: white;
+  padding: 45px 40px;
+  border-radius: 15px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
 }
 
-.auth-card h2{
-    margin-bottom:10px;
+.auth-card h2 {
+  margin-bottom: 10px;
+  color: #2f3c45;
 }
 
-.auth-card p{
-    margin-bottom:25px;
-    color:gray;
+.auth-card p {
+  margin-bottom: 25px;
+  color: #777;
 }

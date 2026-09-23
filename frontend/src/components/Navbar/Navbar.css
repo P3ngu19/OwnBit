@@ -26,7 +26,6 @@
 }
 
 /* Animated underline */
-
 .floating-nav a::after {
     content: "";
 
@@ -49,4 +48,3 @@
 .floating-nav a:hover {
     opacity: 0.7;
 }
-

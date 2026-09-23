@@ -113,7 +113,7 @@ function Register() {
           </button>
         <p className="auth-switch">
           Already have an account?{" "}
-          <Link to="/Login">
+          <Link to="/login">
             Sign In
           </Link>
         </p>

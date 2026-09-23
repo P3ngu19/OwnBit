@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import "./Hero.css";
 import Navbar from "../Navbar/Navbar";
 
@@ -35,6 +36,9 @@ function Hero() {
           <h2 className="hero-subtitle">
             Invest in Real Estate with Ease
           </h2>
+          <Link to="/login" className="hero-btn">
+            Get Started
+          </Link>
         </div>
 
       </div>

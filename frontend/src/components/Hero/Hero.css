@@ -61,7 +61,7 @@
 .hero-content {
   position: absolute;
 
-  top: 40%;
+  top: 45%;
   left: 50%;
 
   transform: translate(-50%, -50%);
@@ -135,39 +135,21 @@
 =========================== */
 
 .hero-btn {
-
-  margin-top: 2.5rem;
-
-  padding: 16px 38px;
-
-  border-radius: 999px;
-
-  border: 1px solid rgba(255,255,255,.30);
-
-  background: rgba(255,255,255,.08);
-
-  backdrop-filter: blur(16px);
-
-  color: #F4F4EE;
-
-  font-size: .95rem;
-
-  letter-spacing: 1px;
-
-  cursor: pointer;
-
-  transition: all .35s ease;
-
+    display: inline-block;
+    margin-top: 30px;
+    padding: 14px 28px;
+    border: 1px solid #F4F4EE;
+    border-radius: 30px;
+    color: #F4F4EE;
+    text-decoration: none;
+    font-size: 15px;
+    font-weight: 500;
+    transition: all 0.3s ease;
 }
 
 .hero-btn:hover {
-
-  background: rgba(255,255,255,.18);
-
-  transform: translateY(-3px);
-
-  box-shadow:
-      0 18px 40px rgba(0,0,0,.25);
+    background: #F4F4EE;
+    color: #2F3C45;
 
 }
 

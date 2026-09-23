@@ -1,62 +1,46 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import AuthLayout from "../../components/AuthLayout/AuthLayout";
-import { loginUser } from "../../services/authService";
+import { loginUser, saveSession } from "../../services/authService";
 import "./Login.css";
 
 function Login() {
   const navigate = useNavigate();
+  const location = useLocation();
+  const [formData, setFormData] = useState({ email: "", password: "" });
+  const [error, setError] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const [formData, setFormData] = useState({
-    email: "",
-    password: "",
-  });
-
-  const handleChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value,
-    });
+  const handleChange = (event) => {
+    setFormData({ ...formData, [event.target.name]: event.target.value });
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+    setError("");
+    setIsSubmitting(true);
 
     try {
-      const response = await loginUser(formData);
-
-      alert(response.data.message);
-
-      // Save JWT
-      localStorage.setItem("token", response.data.token);
-
-      // Save user info (optional but useful)
-      localStorage.setItem(
-        "user",
-        JSON.stringify(response.data.user)
-      );
-
-      // Redirect (we'll create this page next)
-      navigate("/");
-
-    } catch (error) {
-      alert(error.response?.data?.message || "Login failed.");
+      const { data } = await loginUser(formData);
+      saveSession({ token: data.token, user: data.user });
+      navigate(location.state?.from?.pathname || "/dashboard", { replace: true });
+    } catch (requestError) {
+      setError(requestError.response?.data?.message || "Unable to sign in. Please try again.");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   return (
     <AuthLayout
       title="Welcome Back"
-      subtitle="Access your investment portfolio and continue your journey."
+      subtitle="Login to continue your OwnBit journey."
     >
       <form onSubmit={handleSubmit}>
-
         <div className="form-group">
-          <label className="form-label">Email</label>
-
+          <label>Email</label>
           <input
             type="email"
-            className="form-control"
             name="email"
             value={formData.email}
             onChange={handleChange}
@@ -65,12 +49,10 @@ function Login() {
           />
         </div>
 
-        <div className="auth-input">
-          <label className="form-label">Password</label>
-
+        <div className="form-group">
+          <label>Password</label>
           <input
             type="password"
-            className="form-control"
             name="password"
             value={formData.password}
             onChange={handleChange}
@@ -79,16 +61,17 @@ function Login() {
           />
         </div>
 
-          <button className="auth-btn" type="submit">
-            Sign In →
-          </button>
+        {error && <p className="auth-error" role="alert">{error}</p>}
 
-        <p className="auth-switch">
-          Don't have an account?{" "}
-          <Link to="/register">Create Account</Link>
-        </p>
-
+        <button type="submit" className="auth-button" disabled={isSubmitting}>
+          {isSubmitting ? "Signing in..." : "Login"}
+        </button>
       </form>
+
+      <p className="auth-switch">
+        Don't have an account?{" "}
+        <Link to="/register">Create Account</Link>
+      </p>
     </AuthLayout>
   );
 }
