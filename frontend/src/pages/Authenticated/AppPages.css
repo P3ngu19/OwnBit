@@ -731,3 +731,26 @@ td {
     padding: 21px;
   }
 }
+.portfolio-view-link {
+  color: #2f855a;
+  font-size: 0.82rem;
+  font-weight: 600;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.portfolio-view-link:hover {
+  text-decoration: underline;
+}
+
+.portfolio-holdings {
+  cursor: default;
+}
+
+.portfolio-holdings tbody tr {
+  transition: background 0.2s ease;
+}
+
+.portfolio-holdings tbody tr:hover {
+  background: #f7faf8;
+}

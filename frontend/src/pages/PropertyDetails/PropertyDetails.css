@@ -1,0 +1,253 @@
+.property-details {
+  min-height: 100vh;
+  padding: 120px 8% 100px;
+  background: #f7f7f5;
+}
+
+.property-details-container {
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+/* BACK */
+
+.back-link {
+  display: inline-block;
+  margin-bottom: 35px;
+  color: #2f3c45;
+  text-decoration: none;
+  font-weight: 500;
+  transition: 0.3s;
+}
+
+.back-link:hover {
+  transform: translateX(-5px);
+}
+
+/* MAIN GRID */
+
+.property-details-grid {
+  display: grid;
+  grid-template-columns: 1.15fr 0.85fr;
+  gap: 60px;
+  align-items: start;
+}
+
+/* IMAGE */
+
+.property-details-image {
+  height: 650px;
+  overflow: hidden;
+  border-radius: 18px;
+}
+
+.property-details-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* INFO */
+
+.property-details-info {
+  padding: 15px 0;
+}
+
+.property-details-category {
+  font-size: 0.75rem;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: #888;
+}
+
+.property-details-info h1 {
+  margin: 14px 0 8px;
+  font-size: 3.5rem;
+  font-weight: 500;
+  color: #2f3c45;
+  line-height: 1.1;
+}
+
+.property-details-location {
+  color: #888;
+  margin-bottom: 40px;
+}
+
+/* TOKEN PRICE */
+
+.property-details-price {
+  padding: 25px;
+  border-radius: 14px;
+  background: white;
+  margin-bottom: 25px;
+}
+
+.property-details-price span {
+  display: block;
+  color: #888;
+  font-size: 0.85rem;
+  margin-bottom: 8px;
+}
+
+.property-details-price strong {
+  font-size: 2rem;
+  color: #2f3c45;
+}
+
+.property-details-price small {
+  color: #999;
+  margin-left: 8px;
+}
+
+/* STATS */
+
+.property-details-stats {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 15px;
+}
+
+.details-stat {
+  background: white;
+  padding: 22px;
+  border-radius: 14px;
+}
+
+.details-stat span {
+  display: block;
+  color: #888;
+  font-size: 0.8rem;
+  margin-bottom: 8px;
+}
+
+.details-stat strong {
+  color: #2f3c45;
+  font-size: 1.1rem;
+}
+
+/* FUNDING */
+
+.funding-section {
+  margin-top: 30px;
+}
+
+.funding-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 10px;
+  color: #555;
+}
+
+.funding-header strong {
+  color: #2f3c45;
+}
+
+.funding-bar {
+  width: 100%;
+  height: 8px;
+  background: #ddd;
+  border-radius: 20px;
+  overflow: hidden;
+}
+
+.funding-progress {
+  height: 100%;
+  background: #2f3c45;
+  border-radius: 20px;
+}
+
+/* INVEST */
+
+.invest-button {
+  width: 100%;
+  margin-top: 30px;
+  padding: 17px;
+  border: none;
+  border-radius: 10px;
+  background: #2f3c45;
+  color: white;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.invest-button:hover {
+  transform: translateY(-2px);
+  opacity: 0.9;
+}
+
+/* DESCRIPTION */
+
+.property-description {
+  margin-top: 80px;
+  max-width: 850px;
+}
+
+.section-label {
+  font-size: 0.75rem;
+  letter-spacing: 3px;
+  color: #888;
+}
+
+.property-description h2 {
+  margin: 12px 0 20px;
+  font-size: 2.2rem;
+  color: #2f3c45;
+}
+
+.property-description p {
+  color: #666;
+  line-height: 1.8;
+  font-size: 1rem;
+}
+
+/* NOT FOUND */
+
+.property-not-found {
+  max-width: 600px;
+  margin: 100px auto;
+  text-align: center;
+}
+
+.property-not-found h1 {
+  color: #2f3c45;
+}
+
+.property-not-found p {
+  color: #777;
+  margin: 15px 0 30px;
+}
+
+/* RESPONSIVE */
+
+@media (max-width: 900px) {
+  .property-details {
+    padding: 100px 5% 70px;
+  }
+
+  .property-details-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .property-details-image {
+    height: 500px;
+  }
+
+  .property-details-info h1 {
+    font-size: 2.7rem;
+  }
+}
+
+@media (max-width: 600px) {
+  .property-details-stats {
+    grid-template-columns: 1fr;
+  }
+
+  .property-details-image {
+    height: 380px;
+  }
+
+  .property-details-info h1 {
+    font-size: 2.2rem;
+  }
+}

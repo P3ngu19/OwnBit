@@ -9,3 +9,12 @@ npm run dev
 
 cd frontend
 npm run dev
+
+## Git commands
+
+git -help
+git -commit
+git -fetch
+git -pull
+git -push
+git -

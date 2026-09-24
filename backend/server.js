@@ -3,6 +3,7 @@ const cors = require("cors");
 const dotenv = require("dotenv");
 const pool = require("./config/db");
 const authRoutes = require("./routes/authRoutes");
+const propertyRoutes = require("./routes/propertyRoutes");
 
 dotenv.config();
 
@@ -13,6 +14,9 @@ app.use(express.json());
 
 // Authentication Routes
 app.use("/api/auth", authRoutes);
+
+// Property Routes
+app.use("/api/properties", propertyRoutes);
 
 // Home Route
 app.get("/", (req, res) => {
