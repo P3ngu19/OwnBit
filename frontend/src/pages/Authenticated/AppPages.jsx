@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { getSession } from "../../services/authService";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import "./AppPages.css";
 
 const portfolio = [
@@ -30,6 +30,93 @@ const portfolio = [
 export function Dashboard() {
   const name = getSession()?.user?.full_name?.split(" ")[0] || "Investor";
 
+  const [dashboard, setDashboard] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    const fetchDashboard = async () => {
+      try {
+        const session = getSession();
+
+        if (!session?.token) {
+          setError("Please login again.");
+          return;
+        }
+
+        const response = await fetch(
+          "http://localhost:5000/api/dashboard",
+          {
+            headers: {
+              Authorization: `Bearer ${session.token}`,
+            },
+          }
+        );
+
+        const data = await response.json();
+
+        if (!response.ok || !data.success) {
+          throw new Error(
+            data.message || "Failed to load dashboard."
+          );
+        }
+
+        setDashboard(data);
+      } catch (err) {
+        console.error("Dashboard error:", err);
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchDashboard();
+  }, []);
+
+  if (loading) {
+    return (
+      <>
+        <section className="app-hero">
+          <p className="eyebrow">YOUR INVESTMENT SPACE</p>
+
+          <h1>Welcome back, {name}.</h1>
+
+          <p>Loading your investment dashboard...</p>
+        </section>
+      </>
+    );
+  }
+
+  if (error) {
+    return (
+      <>
+        <section className="app-hero">
+          <p className="eyebrow">YOUR INVESTMENT SPACE</p>
+
+          <h1>Welcome back, {name}.</h1>
+
+          <p>{error}</p>
+        </section>
+      </>
+    );
+  }
+
+  const balance = Number(dashboard?.wallet?.balance || 0);
+  const invested = Number(
+    dashboard?.wallet?.invested_amount || 0
+  );
+
+  const tokens = Number(
+    dashboard?.portfolio?.total_tokens || 0
+  );
+
+  const properties = Number(
+    dashboard?.portfolio?.properties_owned || 0
+  );
+
+  const recentTransactions =
+    dashboard?.recent_transactions || [];
+
   return (
     <>
       <section className="app-hero">
@@ -48,19 +135,27 @@ export function Dashboard() {
 
       <section className="stat-grid">
         <Stat
-          label="Portfolio value"
-          value="₹1,36,000"
-          note="↑ 12.8% this year"
+          label="Total invested"
+          value={`₹${invested.toLocaleString("en-IN")}`}
+          note="Actual investment amount"
         />
 
-        <Stat label="Properties owned" value="3" note="Across 3 cities" />
-
-        <Stat label="Tokens owned" value="250" note="Fractional ownership" />
+        <Stat
+          label="Properties owned"
+          value={properties}
+          note="Fractional ownership"
+        />
 
         <Stat
-          label="Projected annual return"
-          value="₹17,020"
-          note="Based on current holdings"
+          label="Tokens owned"
+          value={tokens.toLocaleString("en-IN")}
+          note="Fractional ownership"
+        />
+
+        <Stat
+          label="Available balance"
+          value={`₹${balance.toLocaleString("en-IN")}`}
+          note="Available to invest"
         />
       </section>
 
@@ -69,14 +164,14 @@ export function Dashboard() {
           <div className="section-title">
             <div>
               <p className="eyebrow">OVERVIEW</p>
-              <h2>Portfolio performance</h2>
+              <h2>Portfolio summary</h2>
             </div>
-
-            <span className="positive">+12.8%</span>
           </div>
 
           <div className="chart">
-            <span>₹1.36L</span>
+            <span>
+              ₹{invested.toLocaleString("en-IN")}
+            </span>
 
             <svg viewBox="0 0 600 180" preserveAspectRatio="none">
               <path
@@ -113,24 +208,20 @@ export function Dashboard() {
             <Link to="/transactions">View all</Link>
           </div>
 
-          <Activity
-            title="Investment confirmed"
-            detail="Marina Bay Towers · 80 tokens"
-            amount="₹40,000"
-          />
-
-          <Activity
-            title="Dividend received"
-            detail="Chandrayan Heights"
-            amount="+₹1,150"
-            positive
-          />
-
-          <Activity
-            title="Investment confirmed"
-            detail="Skyline Business Park · 50 tokens"
-            amount="₹30,000"
-          />
+          {recentTransactions.length === 0 ? (
+            <p>No recent transactions.</p>
+          ) : (
+            recentTransactions.map((transaction) => (
+              <Activity
+                key={transaction.id}
+                title="Investment confirmed"
+                detail={`${transaction.property} · ${transaction.tokens} tokens`}
+                amount={`₹${Number(
+                  transaction.amount
+                ).toLocaleString("en-IN")}`}
+              />
+            ))
+          )}
         </div>
       </section>
     </>
@@ -138,149 +229,125 @@ export function Dashboard() {
 }
 
 export function Portfolio() {
+  const [investments, setInvestments] = useState([]);
+  const [summary, setSummary] = useState({
+    total_invested: "0.00",
+    total_tokens: "0",
+    total_investments: "0",
+  });
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    const fetchPortfolio = async () => {
+      try {
+        const session = getSession();
+
+        if (!session?.token) {
+          setError("Please login again.");
+          return;
+        }
+
+        const response = await fetch(
+          "http://localhost:5000/api/portfolio",
+          {
+            headers: {
+              Authorization: `Bearer ${session.token}`,
+            },
+          }
+        );
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(
+            data.message || "Failed to load portfolio."
+          );
+        }
+
+        setInvestments(data.investments || []);
+        setSummary(
+          data.summary || {
+            total_invested: "0.00",
+            total_tokens: "0",
+            total_investments: "0",
+          }
+        );
+      } catch (error) {
+        console.error("Portfolio error:", error);
+        setError("Unable to load portfolio.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchPortfolio();
+  }, []);
+
+  const totalInvested = Number(summary.total_invested || 0);
+  const totalTokens = Number(summary.total_tokens || 0);
+  const totalInvestments = Number(
+    summary.total_investments || 0
+  );
+
+  const uniqueProperties = new Set(
+    investments.map((item) => item.property_id)
+  ).size;
+
   return (
     <Page title="Your portfolio" eyebrow="OWNERSHIP">
       <p className="page-intro">
         A clear view of every fractional property investment you own.
       </p>
 
-      <div className="stat-grid portfolio-stats">
-        <Stat
-          label="Total invested"
-          value="₹1,20,000"
-          note="Across 250 tokens"
-        />
-
-        <Stat
-          label="Current value"
-          value="₹1,36,000"
-          note="Current portfolio value"
-        />
-
-        <Stat label="Total gain" value="+₹16,000" note="+13.3% overall gain" />
-
-        <Stat label="Avg. annual ROI" value="14.2%" note="Projected return" />
-      </div>
-
-      <div className="portfolio-overview">
-        <div className="panel portfolio-performance">
-          <div className="section-title">
-            <div>
-              <p className="eyebrow">PERFORMANCE</p>
-              <h2>Portfolio growth</h2>
-            </div>
-
-            <span className="positive">+13.3%</span>
-          </div>
-
-          <div className="portfolio-value">
-            <span>Current portfolio value</span>
-            <strong>₹1.36L</strong>
-          </div>
-
-          <div className="portfolio-chart">
-            <svg viewBox="0 0 700 220" preserveAspectRatio="none">
-              <defs>
-                <linearGradient id="portfolioFill" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="#2f855a" stopOpacity="0.22" />
-                  <stop offset="100%" stopColor="#2f855a" stopOpacity="0" />
-                </linearGradient>
-              </defs>
-
-              <path
-                d="M0 175
-                   C70 160 90 165 145 145
-                   S230 155 285 120
-                   S370 130 425 95
-                   S505 105 555 65
-                   S635 75 700 28
-                   V220 H0Z"
-                fill="url(#portfolioFill)"
-              />
-
-              <path
-                d="M0 175
-                   C70 160 90 165 145 145
-                   S230 155 285 120
-                   S370 130 425 95
-                   S505 105 555 65
-                   S635 75 700 28"
-                fill="none"
-                stroke="#2f855a"
-                strokeWidth="5"
-              />
-            </svg>
-          </div>
-
-          <div className="chart-months">
-            <span>Jan</span>
-            <span>Mar</span>
-            <span>May</span>
-            <span>Jul</span>
-            <span>Sep</span>
-            <span>Now</span>
-          </div>
+      {loading && (
+        <div className="panel">
+          <p>Loading portfolio...</p>
         </div>
+      )}
 
-        <div className="panel portfolio-breakdown">
-          <div className="section-title">
-            <div>
-              <p className="eyebrow">ALLOCATION</p>
-              <h2>Investment breakdown</h2>
-            </div>
-          </div>
-
-          <div className="allocation-item">
-            <div className="allocation-info">
-              <span>Chandrayan Heights</span>
-              <strong>49%</strong>
-            </div>
-
-            <div className="allocation-bar">
-              <span style={{ width: "49%" }} />
-            </div>
-          </div>
-
-          <div className="allocation-item">
-            <div className="allocation-info">
-              <span>Marina Bay Towers</span>
-              <strong>29%</strong>
-            </div>
-
-            <div className="allocation-bar">
-              <span style={{ width: "29%" }} />
-            </div>
-          </div>
-
-          <div className="allocation-item">
-            <div className="allocation-info">
-              <span>Skyline Business Park</span>
-              <strong>22%</strong>
-            </div>
-
-            <div className="allocation-bar">
-              <span style={{ width: "22%" }} />
-            </div>
-          </div>
-
-          <div className="allocation-total">
-            <span>Properties owned</span>
-            <strong>3</strong>
-          </div>
-
-          <div className="allocation-total">
-            <span>Tokens owned</span>
-            <strong>250</strong>
-          </div>
+      {error && (
+        <div className="panel">
+          <p>{error}</p>
         </div>
-      </div>
+      )}
 
-      <InvestmentTable />
+      {!loading && !error && (
+        <>
+          <div className="stat-grid portfolio-stats">
+            <Stat
+              label="Total invested"
+              value={`₹${totalInvested.toLocaleString("en-IN")}`}
+              note="Actual investment amount"
+            />
+
+            <Stat
+              label="Tokens owned"
+              value={totalTokens.toLocaleString("en-IN")}
+              note="Across your investments"
+            />
+
+            <Stat
+              label="Properties owned"
+              value={uniqueProperties}
+              note="Fractional ownership"
+            />
+
+            <Stat
+              label="Investments"
+              value={totalInvestments}
+              note="Completed investments"
+            />
+          </div>
+
+          <InvestmentTable investments={investments} />
+        </>
+      )}
     </Page>
   );
 }
 
-function InvestmentTable() {
+function InvestmentTable({ investments }) {
   return (
     <div className="panel table-panel">
       <div className="section-title">
@@ -289,52 +356,77 @@ function InvestmentTable() {
           <h2>Property holdings</h2>
         </div>
 
-        <Link to="/marketplace">Add investment →</Link>
+        <Link to="/marketplace">
+          Add investment →
+        </Link>
       </div>
 
-      <div className="responsive-table">
-        <table>
-          <thead>
-            <tr>
-              <th>Property</th>
-              <th>Tokens</th>
-              <th>Current value</th>
-              <th>Return</th>
-              <th></th>
-            </tr>
-          </thead>
-
-          <tbody>
-            {portfolio.map((item) => (
-              <tr key={item.property}>
-                <td>
-                  <strong>{item.property}</strong>
-                </td>
-
-                <td>{item.tokens}</td>
-
-                <td>{item.value}</td>
-
-                <td className="positive">{item.return}</td>
-
-                <td>
-                  <Link
-                    to={`/property/${item.id}`}
-                    className="portfolio-view-link"
-                  >
-                    View →
-                  </Link>
-                </td>
+      {investments.length === 0 ? (
+        <p className="page-intro">
+          You don't have any investments yet.
+        </p>
+      ) : (
+        <div className="responsive-table">
+          <table>
+            <thead>
+              <tr>
+                <th>Property</th>
+                <th>Tokens</th>
+                <th>Invested amount</th>
+                <th>Status</th>
+                <th></th>
               </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+            </thead>
+
+            <tbody>
+              {investments.map((item) => (
+                <tr key={item.id}>
+                  <td>
+                    <strong>{item.property}</strong>
+                    <br />
+                    <small>{item.location}</small>
+                  </td>
+
+                  <td>{item.tokens}</td>
+
+                  <td>
+                    ₹
+                    {Number(
+                      item.invested_amount
+                    ).toLocaleString("en-IN")}
+                  </td>
+
+                  <td>
+                    <span className="status">
+                      {item.status}
+                    </span>
+                  </td>
+
+                  <td>
+                    <Link
+                      to={`/property/${item.property_id}`}
+                      className="portfolio-view-link"
+                    >
+                      View →
+                    </Link>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
     </div>
   );
 }
 
-function InvestmentDetails({ tokens, invested, current, roi, gain }) {
+function InvestmentDetails({
+  tokens,
+  invested,
+  current,
+  roi,
+  gain,
+}) {
   return (
     <div className="investment-details-grid">
       <div>
@@ -366,30 +458,106 @@ function InvestmentDetails({ tokens, invested, current, roi, gain }) {
 }
 
 export function Wallet() {
+  const [wallet, setWallet] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    const session = getSession();
+
+    const fetchWallet = async () => {
+      try {
+        const response = await fetch(
+          "http://localhost:5000/api/wallet",
+          {
+            headers: {
+              Authorization: `Bearer ${session?.token}`,
+            },
+          }
+        );
+
+        const data = await response.json();
+
+        if (!response.ok || !data.success) {
+          throw new Error(
+            data.message || "Failed to fetch wallet."
+          );
+        }
+
+        setWallet(data.wallet);
+      } catch (err) {
+        console.error("Wallet fetch error:", err);
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchWallet();
+  }, []);
+
+  if (loading) {
+    return (
+      <Page title="Wallet" eyebrow="YOUR BALANCE">
+        <p>Loading wallet...</p>
+      </Page>
+    );
+  }
+
+  if (error) {
+    return (
+      <Page title="Wallet" eyebrow="YOUR BALANCE">
+        <p>{error}</p>
+      </Page>
+    );
+  }
+
+  const balance = Number(wallet?.balance || 0);
+  const invested = Number(wallet?.invested_amount || 0);
+
   return (
     <Page title="Wallet" eyebrow="YOUR BALANCE">
       <div className="wallet-card">
         <p>Available balance</p>
 
-        <strong>₹24,500.00</strong>
+        <strong>
+          ₹
+          {balance.toLocaleString("en-IN", {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2,
+          })}
+        </strong>
 
         <span>Use your wallet to reserve property tokens.</span>
 
         <div>
-          <button className="primary-action">Add funds</button>
+          <button className="primary-action">
+            Add funds
+          </button>
 
-          <button className="secondary-action">Withdraw</button>
+          <button className="secondary-action">
+            Withdraw
+          </button>
         </div>
       </div>
 
       <div className="panel wallet-details">
         <h2>Wallet details</h2>
 
-        <Row label="Total deposits" value="₹1,50,000" />
+        <Row
+          label="Invested amount"
+          value={`₹${invested.toLocaleString("en-IN")}`}
+        />
 
-        <Row label="Invested amount" value="₹1,20,000" />
+        <Row
+          label="Available to invest"
+          value={`₹${balance.toLocaleString("en-IN")}`}
+        />
 
-        <Row label="Available to invest" value="₹24,500" />
+        <Row
+          label="Wallet status"
+          value="Active"
+        />
       </div>
     </Page>
   );
@@ -399,7 +567,7 @@ export function Transactions() {
   return (
     <Page title="Transactions" eyebrow="ACCOUNT ACTIVITY">
       <p className="page-intro">
-        Your investments, dividend payouts and wallet activity in one place.
+        View your investment transactions and property token purchases in one place.
       </p>
 
       <div className="panel">
@@ -411,7 +579,10 @@ export function Transactions() {
 
 export function Certificates() {
   return (
-    <Page title="Ownership certificates" eyebrow="VERIFIED RECORDS">
+    <Page
+      title="Ownership certificates"
+      eyebrow="VERIFIED RECORDS"
+    >
       <p className="page-intro">
         Download your proof of fractional ownership for each confirmed
         investment.
@@ -419,16 +590,23 @@ export function Certificates() {
 
       <div className="certificate-grid">
         {portfolio.map((item, index) => (
-          <article className="certificate" key={item.property}>
+          <article
+            className="certificate"
+            key={item.property}
+          >
             <span>OWNBIT</span>
 
             <h2>{item.property}</h2>
 
             <p>Fractional ownership certificate</p>
 
-            <small>Certificate ID: OBT-2026-00{index + 1}</small>
+            <small>
+              Certificate ID: OBT-2026-00{index + 1}
+            </small>
 
-            <button className="secondary-action">View certificate</button>
+            <button className="secondary-action">
+              View certificate
+            </button>
           </article>
         ))}
       </div>
@@ -442,25 +620,38 @@ export function Profile() {
   return (
     <Page title="Profile" eyebrow="ACCOUNT SETTINGS">
       <div className="profile-card">
-        <div className="avatar">{user?.full_name?.[0] || "U"}</div>
+        <div className="avatar">
+          {user?.full_name?.[0] || "U"}
+        </div>
 
         <div>
           <h2>{user?.full_name}</h2>
 
           <p>{user?.email}</p>
 
-          <span className="role-badge">Verified investor</span>
+          <span className="role-badge">
+            Verified investor
+          </span>
         </div>
       </div>
 
       <div className="panel profile-details">
         <h2>Account details</h2>
 
-        <Row label="Full name" value={user?.full_name || "—"} />
+        <Row
+          label="Full name"
+          value={user?.full_name || "—"}
+        />
 
-        <Row label="Email address" value={user?.email || "—"} />
+        <Row
+          label="Email address"
+          value={user?.email || "—"}
+        />
 
-        <Row label="Account status" value="Active" />
+        <Row
+          label="Account status"
+          value="Active"
+        />
       </div>
     </Page>
   );
@@ -492,10 +683,17 @@ function Stat({ label, value, note }) {
   );
 }
 
-function Activity({ title, detail, amount, positive }) {
+function Activity({
+  title,
+  detail,
+  amount,
+  positive,
+}) {
   return (
     <div className="activity">
-      <div className="activity-icon">{positive ? "↗" : "⌁"}</div>
+      <div className="activity-icon">
+        {positive ? "↗" : "⌁"}
+      </div>
 
       <div>
         <strong>{title}</strong>
@@ -503,7 +701,9 @@ function Activity({ title, detail, amount, positive }) {
         <p>{detail}</p>
       </div>
 
-      <span className={positive ? "positive" : ""}>{amount}</span>
+      <span className={positive ? "positive" : ""}>
+        {amount}
+      </span>
     </div>
   );
 }
@@ -519,18 +719,60 @@ function Row({ label, value }) {
 }
 
 function TransactionTable() {
-  const rows = [
-    ["18 Aug 2026", "Investment", "Marina Bay Towers", "−₹40,000", "Completed"],
-    ["12 Aug 2026", "Dividend", "Chandrayan Heights", "+₹1,150", "Completed"],
-    ["03 Aug 2026", "Deposit", "Wallet top-up", "+₹25,000", "Completed"],
-    [
-      "28 Jul 2026",
-      "Investment",
-      "Skyline Business Park",
-      "−₹30,000",
-      "Completed",
-    ],
-  ];
+  const [transactions, setTransactions] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    const session = getSession();
+
+    const fetchTransactions = async () => {
+      try {
+        const response = await fetch(
+          "http://localhost:5000/api/transactions",
+          {
+            headers: {
+              Authorization: `Bearer ${session?.token}`,
+            },
+          }
+        );
+
+        const data = await response.json();
+
+        if (!response.ok || !data.success) {
+          throw new Error(
+            data.message ||
+              "Failed to fetch transactions."
+          );
+        }
+
+        setTransactions(data.transactions);
+      } catch (err) {
+        console.error(
+          "Transactions fetch error:",
+          err
+        );
+
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchTransactions();
+  }, []);
+
+  if (loading) {
+    return <p>Loading transactions...</p>;
+  }
+
+  if (error) {
+    return <p>{error}</p>;
+  }
+
+  if (transactions.length === 0) {
+    return <p>No transactions found.</p>;
+  }
 
   return (
     <div className="responsive-table">
@@ -546,22 +788,53 @@ function TransactionTable() {
         </thead>
 
         <tbody>
-          {rows.map((row) => (
-            <tr key={row.join()}>
-              {row.map((cell, index) => (
-                <td
-                  key={cell}
-                  className={
-                    index === 3 && cell.startsWith("+") ? "positive" : ""
-                  }
-                >
-                  {index === 4 ? <span className="status">{cell}</span> : cell}
+          {transactions.map((transaction) => {
+            const date = new Date(
+              transaction.created_at
+            );
+
+            const formattedDate =
+              date.toLocaleDateString("en-IN", {
+                day: "2-digit",
+                month: "short",
+                year: "numeric",
+              });
+
+            const amount = Number(
+              transaction.amount
+            );
+
+            return (
+              <tr key={transaction.id}>
+                <td>{formattedDate}</td>
+
+                <td>Investment</td>
+
+                <td>
+                  {transaction.property}
+                  <br />
+                  <small>
+                    {transaction.tokens} tokens
+                  </small>
                 </td>
-              ))}
-            </tr>
-          ))}
+
+                <td>
+                  −₹
+                  {amount.toLocaleString("en-IN", {
+                    minimumFractionDigits: 2,
+                  })}
+                </td>
+
+                <td>
+                  <span className="status">
+                    {transaction.status}
+                  </span>
+                </td>
+              </tr>
+            );
+          })}
         </tbody>
       </table>
     </div>
   );
-}
+} 

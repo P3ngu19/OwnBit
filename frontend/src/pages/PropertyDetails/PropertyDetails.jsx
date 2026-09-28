@@ -1,15 +1,165 @@
+import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
-import properties from "../../data/properties";
 import "./PropertyDetails.css";
 
 function PropertyDetails() {
   const { id } = useParams();
 
-  const property = properties.find(
-    (item) => item.id === Number(id)
-  );
+  const [property, setProperty] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
-  if (!property) {
+  useEffect(() => {
+    const fetchProperty = async () => {
+      try {
+        const response = await fetch(
+          `http://localhost:5000/api/properties/${id}`
+        );
+
+        if (!response.ok) {
+          throw new Error("Property not found");
+        }
+
+        const data = await response.json();
+
+        const formattedProperty = {
+          id: data.property.id,
+          title: data.property.title,
+          location: data.property.location,
+          category: data.property.category,
+          image: data.property.image,
+          totalValue: data.property.total_value,
+          tokenPrice: Number(data.property.token_price),
+          roi: `${data.property.roi}%`,
+          funding: Number(data.property.funding),
+          trustScore: Number(data.property.trust_score),
+          availableTokens: Number(data.property.available_tokens),
+        };
+
+        setProperty(formattedProperty);
+      } catch (err) {
+        console.error("Error fetching property:", err);
+        setError("Property not found");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProperty();
+  }, [id]);
+
+  const handleInvest = async () => {
+    const sessionData = sessionStorage.getItem("ownbit_session");
+
+    if (!sessionData) {
+      alert("Please login to invest.");
+      return;
+    }
+
+    let session;
+
+    try {
+      session = JSON.parse(sessionData);
+    } catch (error) {
+      console.error("Session parsing error:", error);
+      alert("Please login again.");
+      return;
+    }
+
+    if (!session?.token) {
+      alert("Please login to invest.");
+      return;
+    }
+
+    const tokens = window.prompt(
+      `Enter number of tokens to invest:\n\nToken price: ₹${property.tokenPrice}`
+    );
+
+    if (tokens === null) {
+      return;
+    }
+
+    const tokenQuantity = Number(tokens);
+
+    if (
+      !Number.isInteger(tokenQuantity) ||
+      tokenQuantity <= 0
+    ) {
+      alert("Please enter a valid whole number of tokens.");
+      return;
+    }
+
+    if (tokenQuantity > property.availableTokens) {
+      alert(
+        `Only ${property.availableTokens.toLocaleString()} tokens are available.`
+      );
+      return;
+    }
+
+    const totalAmount =
+      tokenQuantity * property.tokenPrice;
+
+    const confirmed = window.confirm(
+      `Confirm Investment\n\n` +
+        `Property: ${property.title}\n` +
+        `Tokens: ${tokenQuantity}\n` +
+        `Token Price: ₹${property.tokenPrice}\n` +
+        `Total Investment: ₹${totalAmount.toLocaleString()}`
+    );
+
+    if (!confirmed) {
+      return;
+    }
+
+    try {
+      const response = await fetch(
+        "http://localhost:5000/api/investments",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${session.token}`,
+          },
+          body: JSON.stringify({
+            property_id: property.id,
+            tokens: tokenQuantity,
+          }),
+        }
+      );
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        alert(data.message || "Investment failed.");
+        return;
+      }
+
+      alert(
+        `Investment successful!\n\n` +
+          `Tokens: ${tokenQuantity}\n` +
+          `Amount: ₹${Number(
+            data.investment.amount
+          ).toLocaleString()}`
+      );
+
+      window.location.reload();
+    } catch (error) {
+      console.error("Investment error:", error);
+      alert("Unable to process investment.");
+    }
+  };
+
+  if (loading) {
+    return (
+      <section className="property-details">
+        <div className="property-not-found">
+          <h1>Loading Property...</h1>
+        </div>
+      </section>
+    );
+  }
+
+  if (error || !property) {
     return (
       <section className="property-details">
         <div className="property-not-found">
@@ -28,7 +178,6 @@ function PropertyDetails() {
 
   return (
     <section className="property-details">
-
       <div className="property-details-container">
 
         <Link
@@ -115,7 +264,10 @@ function PropertyDetails() {
 
             </div>
 
-            <button className="invest-button">
+            <button
+              className="invest-button"
+              onClick={handleInvest}
+            >
               Invest Now →
             </button>
 
@@ -147,7 +299,6 @@ function PropertyDetails() {
         </div>
 
       </div>
-
     </section>
   );
 }

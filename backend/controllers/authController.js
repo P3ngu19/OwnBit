@@ -1,10 +1,8 @@
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
+const pool = require("../config/db");
 
-const {
-  createUser,
-  findUserByEmail,
-} = require("../models/userModels");
+const { createUser, findUserByEmail } = require("../models/userModels");
 
 // ================= REGISTER =================
 
@@ -30,18 +28,14 @@ const register = async (req, res) => {
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    const newUser = await createUser(
-      full_name,
-      email,
-      hashedPassword
-    );
+    const newUser = await createUser(full_name, email, hashedPassword);
+    await pool.query("INSERT INTO wallets (user_id) VALUES ($1)", [newUser.id]);
 
     return res.status(201).json({
       success: true,
       message: "User registered successfully!",
       user: newUser,
     });
-
   } catch (error) {
     console.error(error);
 
@@ -92,7 +86,7 @@ const login = async (req, res) => {
       process.env.JWT_SECRET,
       {
         expiresIn: "1d",
-      }
+      },
     );
 
     return res.status(200).json({
@@ -106,7 +100,6 @@ const login = async (req, res) => {
         role: user.role,
       },
     });
-
   } catch (error) {
     console.error(error);
 
