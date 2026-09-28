@@ -4,6 +4,7 @@ import Hero from "../components/Hero/Hero";
 import WhyChoose from "../components/WhyChoose/WhyChoose";
 import FeaturedProperties from "../components/FeaturedProperties/FeaturedProperties";
 import About from "../pages/About/About";
+import WalletConnect from "../components/WalletConnect/WalletConnect";
 
 function Home() {
   return (
@@ -13,6 +14,7 @@ function Home() {
       <WhyChoose />
       <FeaturedProperties />
       <About />
+      <WalletConnect />
     </div>
   );
 }

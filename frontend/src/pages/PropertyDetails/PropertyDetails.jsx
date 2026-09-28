@@ -1,6 +1,10 @@
 import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
+
 import "./PropertyDetails.css";
+
+import { getSession } from "../../services/authService";
+import { issueOwnBitTokens } from "../../services/walletService";
 
 function PropertyDetails() {
   const { id } = useParams();
@@ -49,69 +53,73 @@ function PropertyDetails() {
   }, [id]);
 
   const handleInvest = async () => {
-    const sessionData = sessionStorage.getItem("ownbit_session");
-
-    if (!sessionData) {
-      alert("Please login to invest.");
-      return;
-    }
-
-    let session;
-
     try {
-      session = JSON.parse(sessionData);
-    } catch (error) {
-      console.error("Session parsing error:", error);
-      alert("Please login again.");
-      return;
-    }
+      const session = getSession();
 
-    if (!session?.token) {
-      alert("Please login to invest.");
-      return;
-    }
+      if (!session?.token) {
+        alert("Please login before investing.");
+        return;
+      }
 
-    const tokens = window.prompt(
-      `Enter number of tokens to invest:\n\nToken price: ₹${property.tokenPrice}`
-    );
+      if (!window.ethereum) {
+        alert("MetaMask is not installed.");
+        return;
+      }
 
-    if (tokens === null) {
-      return;
-    }
-
-    const tokenQuantity = Number(tokens);
-
-    if (
-      !Number.isInteger(tokenQuantity) ||
-      tokenQuantity <= 0
-    ) {
-      alert("Please enter a valid whole number of tokens.");
-      return;
-    }
-
-    if (tokenQuantity > property.availableTokens) {
-      alert(
-        `Only ${property.availableTokens.toLocaleString()} tokens are available.`
+      const quantity = prompt(
+        `Enter number of tokens to invest in ${property.title}:`
       );
-      return;
-    }
 
-    const totalAmount =
-      tokenQuantity * property.tokenPrice;
+      if (quantity === null) {
+        return;
+      }
 
-    const confirmed = window.confirm(
-      `Confirm Investment\n\n` +
-        `Property: ${property.title}\n` +
-        `Tokens: ${tokenQuantity}\n` +
-        `Token Price: ₹${property.tokenPrice}\n` +
-        `Total Investment: ₹${totalAmount.toLocaleString()}`
-    );
+      const tokens = Number(quantity);
 
-    if (!confirmed) {
-      return;
-    }
+      if (!Number.isInteger(tokens) || tokens <= 0) {
+        alert("Please enter a valid positive whole number of tokens.");
+        return;
+      }
 
-    try {
+      if (tokens > property.availableTokens) {
+        alert(
+          `Only ${property.availableTokens.toLocaleString()} tokens are available.`
+        );
+        return;
+      }
+
+      const totalAmount = tokens * property.tokenPrice;
+
+      const confirmed = window.confirm(
+        `Invest in ${property.title}?\n\n` +
+          `Tokens: ${tokens}\n` +
+          `Amount: ₹${totalAmount.toLocaleString("en-IN")}\n\n` +
+          `A blockchain transaction will be required.`
+      );
+
+      if (!confirmed) {
+        return;
+      }
+
+      alert(
+        "Please confirm the blockchain transaction in MetaMask."
+      );
+
+      // --------------------------------------------------
+      // STEP 1: BLOCKCHAIN TRANSACTION
+      // --------------------------------------------------
+
+      const blockchainResult = await issueOwnBitTokens(tokens);
+
+      console.log(
+        "Blockchain transaction confirmed:",
+        blockchainResult.hash
+      );
+
+      // --------------------------------------------------
+      // STEP 2: RECORD INVESTMENT IN POSTGRESQL
+      // --------------------------------------------------
+
       const response = await fetch(
         "http://localhost:5000/api/investments",
         {
@@ -122,7 +130,7 @@ function PropertyDetails() {
           },
           body: JSON.stringify({
             property_id: property.id,
-            tokens: tokenQuantity,
+            tokens,
           }),
         }
       );
@@ -130,22 +138,46 @@ function PropertyDetails() {
       const data = await response.json();
 
       if (!response.ok) {
-        alert(data.message || "Investment failed.");
-        return;
+        throw new Error(
+          data.message || "Failed to record investment."
+        );
       }
+
+      // --------------------------------------------------
+      // SUCCESS
+      // --------------------------------------------------
 
       alert(
         `Investment successful!\n\n` +
-          `Tokens: ${tokenQuantity}\n` +
-          `Amount: ₹${Number(
-            data.investment.amount
-          ).toLocaleString()}`
+          `Property: ${property.title}\n` +
+          `Tokens: ${tokens}\n` +
+          `Amount: ₹${totalAmount.toLocaleString("en-IN")}\n\n` +
+          `Blockchain Transaction:\n${blockchainResult.hash}`
       );
 
       window.location.reload();
     } catch (error) {
       console.error("Investment error:", error);
-      alert("Unable to process investment.");
+
+      if (
+        error.code === 4001 ||
+        error.code === "ACTION_REJECTED"
+      ) {
+        alert("Blockchain transaction was rejected in MetaMask.");
+        return;
+      }
+
+      if (
+        error.code === "INSUFFICIENT_FUNDS"
+      ) {
+        alert("Insufficient ETH for the blockchain transaction.");
+        return;
+      }
+
+      alert(
+        error.message ||
+          "Investment failed. Please try again."
+      );
     }
   };
 
@@ -164,11 +196,15 @@ function PropertyDetails() {
       <section className="property-details">
         <div className="property-not-found">
           <h1>Property Not Found</h1>
+
           <p>
             The property you're looking for doesn't exist.
           </p>
 
-          <Link to="/marketplace" className="back-link">
+          <Link
+            to="/marketplace"
+            className="back-link"
+          >
             ← Back to Marketplace
           </Link>
         </div>
@@ -214,7 +250,11 @@ function PropertyDetails() {
 
             <div className="property-details-price">
               <span>Token Price</span>
-              <strong>₹{property.tokenPrice}</strong>
+
+              <strong>
+                ₹{property.tokenPrice.toLocaleString("en-IN")}
+              </strong>
+
               <small>per token</small>
             </div>
 
@@ -232,11 +272,14 @@ function PropertyDetails() {
 
               <div className="details-stat">
                 <span>Trust Score</span>
-                <strong>{property.trustScore}/100</strong>
+                <strong>
+                  {property.trustScore}/100
+                </strong>
               </div>
 
               <div className="details-stat">
                 <span>Available Tokens</span>
+
                 <strong>
                   {property.availableTokens.toLocaleString()}
                 </strong>
@@ -250,7 +293,10 @@ function PropertyDetails() {
 
               <div className="funding-header">
                 <span>Funding Progress</span>
-                <strong>{property.funding}%</strong>
+
+                <strong>
+                  {property.funding}%
+                </strong>
               </div>
 
               <div className="funding-bar">
@@ -272,7 +318,6 @@ function PropertyDetails() {
             </button>
 
           </div>
-
         </div>
 
         {/* DESCRIPTION */}
@@ -288,7 +333,7 @@ function PropertyDetails() {
           </h2>
 
           <p>
-            {property.title} is a verified tokenized
+            {property.title} is a verified tokenized{" "}
             {property.category.toLowerCase()} property
             located in {property.location}. OwnBit enables
             investors to participate in fractional ownership

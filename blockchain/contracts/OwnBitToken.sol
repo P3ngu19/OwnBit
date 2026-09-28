@@ -18,12 +18,21 @@ contract OwnBitToken {
         uint256 amount
     );
 
+    event TokensIssued(
+        address indexed investor,
+        uint256 amount
+    );
+
     constructor(uint256 initialSupply) {
         owner = msg.sender;
         totalSupply = initialSupply;
         balances[msg.sender] = initialSupply;
 
-        emit Transfer(address(0), msg.sender, initialSupply);
+        emit Transfer(
+            address(0),
+            msg.sender,
+            initialSupply
+        );
     }
 
     function balanceOf(address account)
@@ -51,7 +60,47 @@ contract OwnBitToken {
         balances[msg.sender] -= amount;
         balances[to] += amount;
 
-        emit Transfer(msg.sender, to, amount);
+        emit Transfer(
+            msg.sender,
+            to,
+            amount
+        );
+
+        return true;
+    }
+
+    function issueTokens(
+        address investor,
+        uint256 amount
+    ) public returns (bool) {
+        require(
+            msg.sender == owner,
+            "Only owner can issue tokens"
+        );
+
+        require(
+            investor != address(0),
+            "Invalid investor"
+        );
+
+        require(
+            amount > 0,
+            "Amount must be greater than zero"
+        );
+
+        balances[investor] += amount;
+        totalSupply += amount;
+
+        emit Transfer(
+            address(0),
+            investor,
+            amount
+        );
+
+        emit TokensIssued(
+            investor,
+            amount
+        );
 
         return true;
     }

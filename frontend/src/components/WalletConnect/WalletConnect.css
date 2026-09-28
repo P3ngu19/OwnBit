@@ -1,0 +1,30 @@
+.wallet-connect {
+  margin: 40px auto;
+  max-width: 500px;
+  padding: 24px;
+  text-align: center;
+}
+
+.connect-wallet-btn {
+  padding: 12px 24px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.wallet-connected {
+  padding: 20px;
+  border-radius: 12px;
+  background: #f5f5f5;
+}
+
+.wallet-connected p {
+  margin: 10px 0;
+}
+
+.wallet-error {
+  margin-top: 15px;
+  color: #c62828;
+}
